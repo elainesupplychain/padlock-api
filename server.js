@@ -11,6 +11,7 @@ const PORT = process.env.PORT || 3000;
 // ---- 中间件 ----
 app.use(cors());                    // 允许跨域（前端页面可能独立部署）
 app.use(express.json());            // 解析 JSON 请求体
+app.use(express.static(__dirname)); // 托管静态文件（order-track.html 等）
 
 // ---- 工具函数 ----
 // 生成唯一订单号：PL-年月日-4位序号随机码
@@ -24,6 +25,19 @@ function generateOrderNo() {
   const random = Math.floor(1000 + Math.random() * 9000); // 1000-9999
   return `PL-${dateStr}-${random}`;
 }
+
+// ============================================================
+// GET /api/health — 健康检查（Railway 部署探测用）
+// ============================================================
+app.get('/api/health', async (req, res) => {
+  try {
+    const db = await getDb();
+    const count = db.prepare('SELECT COUNT(*) as cnt FROM orders').get();
+    res.json({ status: 'ok', db: 'connected', orders_count: count.cnt });
+  } catch (err) {
+    res.status(500).json({ status: 'error', db: 'disconnected', message: err.message });
+  }
+});
 
 // ============================================================
 // POST /api/orders — 创建订单

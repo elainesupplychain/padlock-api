@@ -5,7 +5,7 @@ const path = require('path');
 const { createDatabase } = require('./sqljs-adapter');
 
 // 数据库文件路径（项目根目录下）
-const DB_PATH = path.join(__dirname, 'padlock.db');
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'padlock.db');
 
 let db = null;
 let initPromise = null;
