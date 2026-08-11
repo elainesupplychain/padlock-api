@@ -1,4 +1,4 @@
-// PadLock 订单管理后端 - Express 应用入口
+// PadLock 订单管理后端 - Express 应用入口 (v2)
 // 提供订单创建、免密查询、管理接口
 
 const express = require('express');
