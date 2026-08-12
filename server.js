@@ -126,25 +126,6 @@ app.post('/api/orders/lookup', async (req, res) => {
 });
 
 // ============================================================
-// GET /api/orders/:orderId — 按订单号查询单个订单
-// ============================================================
-app.get('/api/orders/:orderId', async (req, res) => {
-  try {
-    const db = await getDb();
-    const order = db.prepare('SELECT * FROM orders WHERE order_no = ?').get(req.params.orderId);
-
-    if (!order) {
-      return res.status(404).json({ error: '订单不存在' });
-    }
-
-    res.json({ success: true, order });
-  } catch (err) {
-    console.error('[单订单查询失败]', err.message);
-    res.status(500).json({ error: '服务器内部错误' });
-  }
-});
-
-// ============================================================
 // GET /api/orders/admin — 管理员查看所有订单
 // ============================================================
 app.get('/api/orders/admin', async (req, res) => {
@@ -168,6 +149,25 @@ app.get('/api/orders/admin', async (req, res) => {
     });
   } catch (err) {
     console.error('[管理查询失败]', err.message);
+    res.status(500).json({ error: '服务器内部错误' });
+  }
+});
+
+// ============================================================
+// GET /api/orders/:orderId — 按订单号查询单个订单
+// ============================================================
+app.get('/api/orders/:orderId', async (req, res) => {
+  try {
+    const db = await getDb();
+    const order = db.prepare('SELECT * FROM orders WHERE order_no = ?').get(req.params.orderId);
+
+    if (!order) {
+      return res.status(404).json({ error: '订单不存在' });
+    }
+
+    res.json({ success: true, order });
+  } catch (err) {
+    console.error('[单订单查询失败]', err.message);
     res.status(500).json({ error: '服务器内部错误' });
   }
 });
