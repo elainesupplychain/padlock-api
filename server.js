@@ -182,8 +182,7 @@ app.post('/api/orders/admin/reset-timestamps', async (req, res) => {
     const orders = db.prepare('SELECT * FROM orders ORDER BY id ASC').all();
     const now = new Date();
     // 5 条订单分布在过去 5 天内，各差约 1 天
-    const days = [0, 1, 2, 3, 4]; // 今天、1天前、2天前、3天前、4天前
-    // 随机打乱顺序
+    const days = [0, 0, 0, 1, 1]; // 3条今天、2条昨天
     for (let i = days.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [days[i], days[j]] = [days[j], days[i]];
