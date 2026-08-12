@@ -174,6 +174,29 @@ app.get('/api/orders/:orderId', async (req, res) => {
 
 
 // ============================================================
+// POST /api/orders/admin/reset-timestamps — 重新分配订单时间（散开）
+// ============================================================
+app.post('/api/orders/admin/reset-timestamps', async (req, res) => {
+  try {
+    const db = await getDb();
+    const orders = db.prepare('SELECT * FROM orders ORDER BY id ASC').all();
+    const now = new Date();
+    // 从最新往前推，每条间隔 2~6 小时
+    for (let i = 0; i < orders.length; i++) {
+      const hoursAgo = i * (2 + Math.floor(Math.random() * 5)) + Math.floor(Math.random() * 60);
+      const ts = new Date(now.getTime() - hoursAgo * 60 * 1000);
+      const iso = ts.toISOString().replace('T', ' ').substring(0, 19);
+      db.prepare('UPDATE orders SET created_at = ? WHERE id = ?').run(iso, orders[i].id);
+    }
+    const updated = db.prepare('SELECT * FROM orders ORDER BY created_at DESC').all();
+    res.json({ success: true, count: updated.length, orders: updated });
+  } catch (err) {
+    console.error('[重置时间戳失败]', err.message);
+    res.status(500).json({ error: '服务器内部错误' });
+  }
+});
+
+// ============================================================
 // GET /admin — 管理后台页面
 // ============================================================
 app.get('/admin', (req, res) => {
