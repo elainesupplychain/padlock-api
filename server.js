@@ -181,10 +181,17 @@ app.post('/api/orders/admin/reset-timestamps', async (req, res) => {
     const db = await getDb();
     const orders = db.prepare('SELECT * FROM orders ORDER BY id ASC').all();
     const now = new Date();
-    // 从最新往前推，每条间隔 2~6 小时
+    // 5 条订单分布在过去 5 天内，各差约 1 天
+    const days = [0, 1, 2, 3, 4]; // 今天、1天前、2天前、3天前、4天前
+    // 随机打乱顺序
+    for (let i = days.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [days[i], days[j]] = [days[j], days[i]];
+    }
     for (let i = 0; i < orders.length; i++) {
-      const hoursAgo = i * (2 + Math.floor(Math.random() * 5)) + Math.floor(Math.random() * 60);
-      const ts = new Date(now.getTime() - hoursAgo * 60 * 1000);
+      const d = days[i] || 0;
+      const minutes = Math.floor(Math.random() * 720); // 0~12小时随机分钟
+      const ts = new Date(now.getTime() - d * 86400 * 1000 - minutes * 60 * 1000);
       const iso = ts.toISOString().replace('T', ' ').substring(0, 19);
       db.prepare('UPDATE orders SET created_at = ? WHERE id = ?').run(iso, orders[i].id);
     }
